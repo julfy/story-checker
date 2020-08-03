@@ -45,7 +45,8 @@ STORIES = [
     ('Healer', 'https://www.royalroad.com/fiction/syndication/32494', 'rss'),
     ('Villager Three', 'https://www.royalroad.com/fiction/syndication/32576', 'rss'),
     ('Savage Divinity', 'https://www.royalroad.com/fiction/syndication/5701', 'rss'),
-    ('Displaced', 'https://www.royalroad.com/fiction/syndication/15538', 'rss')
+    ('Displaced', 'https://www.royalroad.com/fiction/syndication/15538', 'rss'),
+    ('Never Die Twice', 'https://www.royalroad.com/fiction/syndication/32067', 'rss'),
 ]
 
 def pparse(tree, i=1):
