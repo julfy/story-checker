@@ -83,17 +83,18 @@ def get_tgab(link):
 
 def get_pgte(link):
     data = subprocess.check_output(f'curl -s {link}'.split(' ')).decode()
-    scut = data.find('<article')
-    if data[scut:scut+100].startswith('<article id="post-3"'):  # skip pinned
-        scut = data.find('<article', scut+10)
-    ecut = data.find('</article>', scut) + 10
+    acut = data.find('<article')
+    if data[acut:acut+100].startswith('<article id="post-3"'):  # skip pinned
+        acut = data.find('<article', acut+10)
+    scut = data.find('<header', acut+10)
+    ecut = data.find('</header>', scut) + 9
     xml = ET.fromstring(f'{data[scut:ecut]}')
 
     def parse(tree):
         for ch in tree:
-            if ch.tag == 'article':
-                h1 = ch[0][0][0][0]  # .entry-wrapper.header.h1.a
-                date = ch[0][0][1][0][0][-1]  # .entry-wrapper.header.entry-meta.posted-on.a.time
+            if ch.tag == 'header':
+                h1 = ch[0][0]  # .h1.a
+                date = ch[1][0][0][-1]  # .entry-meta.posted-on.a.time
                 return Chapter(title=h1.text, link=h1.attrib['href'], pubdate=datetime.strptime(date.attrib['datetime'], '%Y-%m-%dT%H:%M:%S%z').timestamp())
         return None
 
