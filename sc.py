@@ -47,6 +47,7 @@ STORIES = [
     ('Savage Divinity', 'https://www.royalroad.com/fiction/syndication/5701', 'rss'),
     ('Displaced', 'https://www.royalroad.com/fiction/syndication/15538', 'rss'),
     ('Never Die Twice', 'https://www.royalroad.com/fiction/syndication/32067', 'rss'),
+    ('Super Minion', 'https://www.royalroad.com/fiction/syndication/21410', 'rss'),
 ]
 
 def pparse(tree, i=1):
@@ -132,11 +133,11 @@ class Checker:
         with open(self.history_file, 'w') as out:
             out.write(json.dumps(self.history))
 
-    def send_notification(self, address, title, link):
+    def send_notification(self, address, name, chapter):
         if not address:
             raise Exception('Receiver address not set!')
-        subject = title
-        content = link
+        subject = name
+        content = f'<a href="{chapter.link}">{chapter.title}</a>'
         data = f'Subject:{subject}\nContent-Type: text/plain; charset="utf-8"\n\n{content}\n'
         subprocess.run(['sudo', 'ssmtp', '-F', 'StoryChecker', address], stdin=subprocess.Popen(['printf', data], stdout=subprocess.PIPE).stdout)
 
@@ -157,7 +158,7 @@ class Checker:
         pretty_date = datetime.fromtimestamp(self.history[name]).replace(tzinfo=timezone.utc).astimezone(tz=None)
         log.info(f'{new_pfx}{name} last updated on {pretty_date}')
         if is_new and self.send_email:
-            self.send_notification(NOTIFY_EMAIL, chapter.title, chapter.link)
+            self.send_notification(NOTIFY_EMAIL, name, chapter)
 
     def check_stories(self, stories):
         for story, link, getter in stories:
