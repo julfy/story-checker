@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import argparse
 from datetime import datetime, timezone
 import json
 import os
@@ -25,7 +26,6 @@ import xml.etree.ElementTree as ET
 ########################################
 LOGFILE = 'story_checker.log'
 HISTORY_FILE = 'story_checker_history.json'
-DRY_RUN = False
 NOTIFY_EMAIL = None  # Receiver email
 
 
@@ -118,8 +118,9 @@ def assign_getters(r):
 STORIES = list(map(assign_getters, STORIES))
 
 class Checker:
-    def __init__(self, send=False):
+    def __init__(self, send=False, update_history=True):
         self.send_email = send
+        self.update_history = update_history
         self.history_file = os.path.expanduser(HISTORY_FILE)
         self.history = self.get_history()
 
@@ -130,6 +131,8 @@ class Checker:
             return json.loads(inp.read())
 
     def save_history(self):
+        if not self.update_history:
+            return
         with open(self.history_file, 'w') as out:
             out.write(json.dumps(self.history))
 
@@ -138,7 +141,7 @@ class Checker:
             raise Exception('Receiver address not set!')
         subject = name
         content = f'<a href="{chapter.link}">{chapter.title}</a>'
-        data = f'Subject:{subject}\nContent-Type: text/plain; charset="utf-8"\n\n{content}\n'
+        data = f'Subject:{subject}\nContent-Type: text/html; charset="utf-8"\n\n{content}\n'
         subprocess.run(['sudo', 'ssmtp', '-F', 'StoryChecker', address], stdin=subprocess.Popen(['printf', data], stdout=subprocess.PIPE).stdout)
 
     def check_story(self, name, link, getter):
@@ -164,21 +167,31 @@ class Checker:
         for story, link, getter in stories:
             self.check_story(story, link, getter)
             time.sleep(1.0)
-        if not DRY_RUN:
-            self.save_history()
+        self.save_history()
 
 
 if __name__ == '__main__':
-    if len(sys.argv) > 2 and sys.argv[1] == '-d':
+    parser = argparse.ArgumentParser()
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument('-d', type=str, metavar='email', help = 'Start periodic check loop and send notifications to email; 1h period')
+    group.add_argument('-t', type=str, metavar='email', help = 'Test run; sends email')
+
+    args = parser.parse_args()
+    if args.d:
         lh = logging.FileHandler(LOGFILE)
         lh.setFormatter(logging.Formatter('%(asctime)s %(levelname)s : %(message)s'))
         log.addHandler(lh)
-        NOTIFY_EMAIL=sys.argv[2]
+        NOTIFY_EMAIL=args.d
         checker = Checker(send=True)
         log.info('Starting loop')
         while True:
             time.sleep(3600.0)
             checker.check_stories(STORIES)
+    elif args.t:
+        log.addHandler(logging.StreamHandler(sys.stdout))
+        NOTIFY_EMAIL=args.t
+        c = Checker(send=True, update_history=False)
+        c.check_stories([('Test', 'http://google.com', lambda link: Chapter('Chapter 1', link, 1))])
     else:
         log.addHandler(logging.StreamHandler(sys.stdout))
         c=Checker(send=False)
