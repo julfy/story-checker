@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import argparse
 from datetime import datetime, timezone
+import html
 import json
 import os
 import sys
@@ -57,8 +58,11 @@ def pparse(tree, i=1):
 
 ### GETTERS
 
+def get_data(link):
+    return html.unescape(subprocess.check_output(f'curl -s {link}'.split(' ')).decode())
+
 def get_royalroad_rss(link):
-    data = subprocess.check_output(f'curl -s {link}'.split(' ')).decode()
+    data = get_data(link)
     xml = ET.fromstring(data)
     for child in xml[0]:
         if child.tag == 'item':
@@ -66,16 +70,20 @@ def get_royalroad_rss(link):
 
 
 def get_tgab(link):
-    data = subprocess.check_output(f'curl -s {link}'.split(' ')).decode()
-    scut = data.find('<article')
-    ecut = data.find('</article>', scut) + 10
+    data = get_data(link)
+    acut = data.find('<article')
+    while "post-password-required" in data[acut:acut+300]:
+        acut = data.find('<article', acut+10)
+    scut = data.find('<header', acut+10)
+    ecut = data.find('</header>', scut) + 9
+
     xml = ET.fromstring(f'{data[scut:ecut]}')
 
     def parse(tree):
         for ch in tree:
-            if ch.tag == 'article':
-                h1 = ch[0][0][0]  # .header.h1.a
-                date = ch[0][1][0][0][0]  # .header.entry-meta.date.a.time
+            if ch.tag == 'header':
+                h1 = ch[0][0]  # .h1.a
+                date = ch[1][0][0][0]  # .entry-meta.date.a.time
                 return Chapter(title=h1.text, link=h1.attrib['href'], pubdate=datetime.strptime(date.attrib['datetime'], '%Y-%m-%dT%H:%M:%S%z').timestamp())
         return None
 
@@ -83,7 +91,7 @@ def get_tgab(link):
 
 
 def get_pgte(link):
-    data = subprocess.check_output(f'curl -s {link}'.split(' ')).decode()
+    data = get_data(link)
     acut = data.find('<article')
     if data[acut:acut+100].startswith('<article id="post-3"'):  # skip pinned
         acut = data.find('<article', acut+10)
