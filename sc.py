@@ -62,7 +62,8 @@ def get_data(link):
     return html.unescape(subprocess.check_output(f'curl -s {link}'.split(' ')).decode())
 
 def get_royalroad_rss(link):
-    data = get_data(link)
+    # html.unescape will break this
+    data = subprocess.check_output(f'curl -s {link}'.split(' ')).decode()
     xml = ET.fromstring(data)
     for child in xml[0]:
         if child.tag == 'item':
