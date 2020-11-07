@@ -44,11 +44,12 @@ STORIES = [
     ('The Humble Life of a Skill Trainer', 'https://www.royalroad.com/fiction/syndication/30737', 'rss'),
     ('Dungeon Crawler Carl', 'https://www.royalroad.com/fiction/syndication/29358', 'rss'),
     ('Healer', 'https://www.royalroad.com/fiction/syndication/32494', 'rss'),
-    ('Villager Three', 'https://www.royalroad.com/fiction/syndication/32576', 'rss'),
     ('Savage Divinity', 'https://www.royalroad.com/fiction/syndication/5701', 'rss'),
     ('Displaced', 'https://www.royalroad.com/fiction/syndication/15538', 'rss'),
-    ('Never Die Twice', 'https://www.royalroad.com/fiction/syndication/32067', 'rss'),
     ('Super Minion', 'https://www.royalroad.com/fiction/syndication/21410', 'rss'),
+    ('A Journey of Black and Red', 'https://www.royalroad.com/fiction/syndication/26675', 'rss'),
+    ('The Many Lives of Cadence Lee', 'https://www.royalroad.com/fiction/syndication/35925', 'rss'),
+    ('Delve', 'https://www.royalroad.com/fiction/syndication/25225', 'rss'),
 ]
 
 def pparse(tree, i=1):
