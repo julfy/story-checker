@@ -194,9 +194,11 @@ if __name__ == '__main__':
         NOTIFY_EMAIL=args.d
         checker = Checker(send=True)
         log.info('Starting loop')
+        period = 600.0  # first time 10 minutes
         while True:
-            time.sleep(3600.0)
+            time.sleep(period)
             checker.check_stories(STORIES)
+            period = 3600.0
     elif args.t:
         log.addHandler(logging.StreamHandler(sys.stdout))
         NOTIFY_EMAIL=args.t
