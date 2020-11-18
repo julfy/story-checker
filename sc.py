@@ -183,7 +183,7 @@ class Checker:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group()
-    group.add_argument('-d', type=str, metavar='email', help = 'Start periodic check loop and send notifications to email; 1h period')
+    group.add_argument('-d', type=str, metavar='email', help = 'Start periodic check loop and send notifications to email; run every 5th minute of an hour')
     group.add_argument('-t', type=str, metavar='email', help = 'Test run; sends email')
 
     args = parser.parse_args()
@@ -198,7 +198,9 @@ if __name__ == '__main__':
         while True:
             time.sleep(period)
             checker.check_stories(STORIES)
-            period = 3600.0
+            # calc next period
+            delta = int(datetime.now().minute - 5)
+            period = 60.0 * (((delta >> 31)**2 + 1) % 2 * 60 - delta) # heh; fine... `(delta >> 31)**2` : get 1 for negative numbers;  `+ 1) % 2` : 1 <-> 0
     elif args.t:
         log.addHandler(logging.StreamHandler(sys.stdout))
         NOTIFY_EMAIL=args.t
