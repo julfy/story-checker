@@ -169,7 +169,7 @@ class Checker:
             self.history.update({name: chapter.pubdate})
         new_pfx = '--> ' if is_new else ''
         pretty_date = datetime.fromtimestamp(self.history[name]).replace(tzinfo=timezone.utc).astimezone(tz=None)
-        log.info(f'{new_pfx}{name} last updated on {pretty_date}')
+        log.info(f'{new_pfx}\t{pretty_date} - {name}')
         if is_new and self.send_email:
             self.send_notification(NOTIFY_EMAIL, name, chapter)
 
@@ -200,7 +200,7 @@ if __name__ == '__main__':
             checker.check_stories(STORIES)
             # calc next period
             delta = int(datetime.now().minute - 5)
-            period = 60.0 * (((delta >> 31)**2 + 1) % 2 * 60 - delta) # heh; fine... `(delta >> 31)**2` : get 1 for negative numbers;  `+ 1) % 2` : 1 <-> 0
+            period = 60.0 * (((delta >> 31) + 1) * 60 - delta) # heh
     elif args.t:
         log.addHandler(logging.StreamHandler(sys.stdout))
         NOTIFY_EMAIL=args.t
