@@ -43,13 +43,16 @@ STORIES = [
     ('Seaborn', 'https://www.royalroad.com/fiction/syndication/30131', 'rss'),
     ('The Humble Life of a Skill Trainer', 'https://www.royalroad.com/fiction/syndication/30737', 'rss'),
     ('Dungeon Crawler Carl', 'https://www.royalroad.com/fiction/syndication/29358', 'rss'),
-    ('Healer', 'https://www.royalroad.com/fiction/syndication/32494', 'rss'),
     ('Savage Divinity', 'https://www.royalroad.com/fiction/syndication/5701', 'rss'),
     ('Displaced', 'https://www.royalroad.com/fiction/syndication/15538', 'rss'),
     ('Super Minion', 'https://www.royalroad.com/fiction/syndication/21410', 'rss'),
     ('A Journey of Black and Red', 'https://www.royalroad.com/fiction/syndication/26675', 'rss'),
     ('The Many Lives of Cadence Lee', 'https://www.royalroad.com/fiction/syndication/35925', 'rss'),
     ('Delve', 'https://www.royalroad.com/fiction/syndication/25225', 'rss'),
+    ('Only Villains Do That', 'https://www.royalroad.com/fiction/syndication/40182', 'rss'),
+    ('The Perfect Run', 'https://www.royalroad.com/fiction/syndication/36735', 'rss'),
+    ('I Am Going To Die', 'https://www.royalroad.com/fiction/syndication/21844', 'rss'),
+    ('Tower of Somnus', 'https://www.royalroad.com/fiction/syndication/36983', 'rss'),
 ]
 
 def pparse(tree, i=1):
