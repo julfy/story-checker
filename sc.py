@@ -25,15 +25,24 @@ import xml.etree.ElementTree as ET
 # AuthPass=xxxxx
 #
 ########################################
+
+
 LOGFILE = 'story_checker.log'
 HISTORY_FILE = 'story_checker_history.json'
 NOTIFY_EMAIL = None  # Receiver email
 
-
 Chapter = namedtuple('Chapter', ['title', 'link', 'pubdate'])
 
 log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
+
+def select_log_out(choice=None):
+    log.setLevel(logging.DEBUG)
+    if choice == 'file':
+        lh = logging.FileHandler(LOGFILE)
+    else:
+        lh = logging.StreamHandler(sys.stdout)
+    lh.setFormatter(logging.Formatter('%(asctime)s %(levelname)s:\t%(message)s'))
+    log.addHandler(lh)
 
 
 STORIES = [
@@ -191,9 +200,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     if args.d:
-        lh = logging.FileHandler(LOGFILE)
-        lh.setFormatter(logging.Formatter('%(asctime)s %(levelname)s : %(message)s'))
-        log.addHandler(lh)
+        select_log_out('file')
         NOTIFY_EMAIL=args.d
         checker = Checker(send=True)
         log.info('Starting loop')
@@ -205,11 +212,11 @@ if __name__ == '__main__':
             delta = int(datetime.now().minute - 5)
             period = 60.0 * (((delta >> 31) + 1) * 60 - delta) # heh
     elif args.t:
-        log.addHandler(logging.StreamHandler(sys.stdout))
+        select_log_out('stdout')
         NOTIFY_EMAIL=args.t
         c = Checker(send=True, update_history=False)
         c.check_stories([('Test', 'http://google.com', lambda link: Chapter('Chapter 1', link, 1))])
     else:
-        log.addHandler(logging.StreamHandler(sys.stdout))
-        c=Checker(send=False)
+        select_log_out('stdout')
+        c=Checker(send=False, update_history=False)
         c.check_stories(STORIES)
