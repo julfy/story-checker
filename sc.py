@@ -14,15 +14,22 @@ import xml.etree.ElementTree as ET
 
 ########################################
 # -d to run in infinite loop with output to log
-#
-# Requires sSMTP
-# # settings for /etc/ssmtp/ssmtp.conf
-# FromLineOverride=YES
-# mailhub=smtp.gmail.com:587 ### -> note 587 for STARTTLS
-# UseTLS=Yes
-# UseSTARTTLS=Yes
-# AuthUser=xxxxx@gmail.com  ### Sender email
-# AuthPass=xxxxx
+
+# For gmail (with deactivated 2-factor login) use this configuration in /etc/msmtprc:
+
+# # Set default values for all following accounts.
+# defaults
+# port 587
+# tls on
+# tls_trust_file /etc/ssl/certs/ca-certificates.crt
+# account gmail
+# host smtp.gmail.com
+# from <user>@gmail.com
+# auth on
+# user <user>
+# password <your password>
+# # Set a default account
+# account default : gmail
 #
 ########################################
 
