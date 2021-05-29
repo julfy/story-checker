@@ -164,7 +164,7 @@ class Checker:
         subject = name
         content = f'<a href="{chapter.link}">{chapter.title}</a>'
         data = f'Subject:{subject}\nContent-Type: text/html; charset="utf-8"\n\n{content}\n'
-        subprocess.run(['sudo', 'ssmtp', '-F', 'StoryChecker', address], stdin=subprocess.Popen(['printf', data], stdout=subprocess.PIPE).stdout)
+        subprocess.run(['msmtp', '-F', 'StoryChecker', address], stdin=subprocess.Popen(['printf', data], stdout=subprocess.PIPE).stdout)
 
     def check_story(self, name, link, getter):
         try:

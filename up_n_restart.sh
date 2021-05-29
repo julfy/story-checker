@@ -5,5 +5,5 @@ git fetch
 git rebase
 git stash pop
 
-sudo pkill -f 'sc.py'
-(sudo ./sc.py -d 'XXXXX@gmail.com' &)
+pkill -f 'sc.py'
+(./sc.py -d 'XXXXX@gmail.com' &)
