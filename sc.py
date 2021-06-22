@@ -57,18 +57,22 @@ STORIES = [
     ('TGAB', 'https://tiraas.net/', 'tgab'),
     ('Metaworld Chronicles', 'https://www.royalroad.com/fiction/syndication/14167', 'rss'),
     ('Seaborn', 'https://www.royalroad.com/fiction/syndication/30131', 'rss'),
-    ('The Humble Life of a Skill Trainer', 'https://www.royalroad.com/fiction/syndication/30737', 'rss'),
     ('Dungeon Crawler Carl', 'https://www.royalroad.com/fiction/syndication/29358', 'rss'),
     ('Savage Divinity', 'https://www.royalroad.com/fiction/syndication/5701', 'rss'),
     ('Displaced', 'https://www.royalroad.com/fiction/syndication/15538', 'rss'),
     ('Super Minion', 'https://www.royalroad.com/fiction/syndication/21410', 'rss'),
     ('A Journey of Black and Red', 'https://www.royalroad.com/fiction/syndication/26675', 'rss'),
+    ('The Calamitous Bob', 'https://www.royalroad.com/fiction/syndication/44132', 'rss'),
     ('The Many Lives of Cadence Lee', 'https://www.royalroad.com/fiction/syndication/35925', 'rss'),
     ('Delve', 'https://www.royalroad.com/fiction/syndication/25225', 'rss'),
     ('Only Villains Do That', 'https://www.royalroad.com/fiction/syndication/40182', 'rss'),
     ('The Perfect Run', 'https://www.royalroad.com/fiction/syndication/36735', 'rss'),
+    ('Kairos: A Greek Myth', 'https://www.royalroad.com/fiction/syndication/41033', 'rss'),
     ('I Am Going To Die', 'https://www.royalroad.com/fiction/syndication/21844', 'rss'),
     ('Tower of Somnus', 'https://www.royalroad.com/fiction/syndication/36983', 'rss'),
+    ('Vigor Mortis', 'https://www.royalroad.com/fiction/syndication/40373', 'rss'),
+    ('Sylver Seeker', 'https://www.royalroad.com/fiction/syndication/36065', 'rss'),
+    ('Blue Core', 'https://www.royalroad.com/fiction/syndication/25082', 'rss'),
 ]
 
 def pparse(tree, i=1):
@@ -203,7 +207,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group()
     group.add_argument('-d', type=str, metavar='email', help = 'Start periodic check loop and send notifications to email; run every 5th minute of an hour')
-    group.add_argument('-t', type=str, metavar='email', help = 'Test run; sends email')
+    group.add_argument('-t', type=str, metavar='email', default=None, const='NONE', nargs='?', help = 'Test run; sends email')
 
     args = parser.parse_args()
     if args.d:
@@ -221,9 +225,9 @@ if __name__ == '__main__':
     elif args.t:
         select_log_out('stdout')
         NOTIFY_EMAIL=args.t
-        c = Checker(send=True, update_history=False)
+        c = Checker(send=args.t != 'NONE', update_history=False)
         c.check_stories([('Test', 'http://google.com', lambda link: Chapter('Chapter 1', link, 1))])
     else:
         select_log_out('stdout')
-        c=Checker(send=False, update_history=False)
+        c=Checker(send=False, update_history=True)
         c.check_stories(STORIES)
