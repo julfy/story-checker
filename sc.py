@@ -53,7 +53,8 @@ def select_log_out(choice=None):
 
 
 STORIES = [
-    ('PGTE', 'https://practicalguidetoevil.wordpress.com/', 'pgte'),
+    # ('PGTE', 'https://practicalguidetoevil.wordpress.com/', 'pgte'),
+    # ('Pale Lights', 'https://palelights613694448.wordpress.com/', '')
     ('TGAB', 'https://tiraas.net/', 'tgab'),
     ('Metaworld Chronicles', 'https://www.royalroad.com/fiction/syndication/14167', 'rss'),
     ('Seaborn', 'https://www.royalroad.com/fiction/syndication/30131', 'rss'),
@@ -66,13 +67,18 @@ STORIES = [
     ('The Many Lives of Cadence Lee', 'https://www.royalroad.com/fiction/syndication/35925', 'rss'),
     ('Delve', 'https://www.royalroad.com/fiction/syndication/25225', 'rss'),
     ('Only Villains Do That', 'https://www.royalroad.com/fiction/syndication/40182', 'rss'),
-    ('The Perfect Run', 'https://www.royalroad.com/fiction/syndication/36735', 'rss'),
+    # ('The Perfect Run', 'https://www.royalroad.com/fiction/syndication/36735', 'rss'),
     ('Kairos: A Greek Myth', 'https://www.royalroad.com/fiction/syndication/41033', 'rss'),
     ('I Am Going To Die', 'https://www.royalroad.com/fiction/syndication/21844', 'rss'),
     ('Tower of Somnus', 'https://www.royalroad.com/fiction/syndication/36983', 'rss'),
     ('Vigor Mortis', 'https://www.royalroad.com/fiction/syndication/40373', 'rss'),
     ('Sylver Seeker', 'https://www.royalroad.com/fiction/syndication/36065', 'rss'),
-    ('Blue Core', 'https://www.royalroad.com/fiction/syndication/25082', 'rss'),
+    ('Underland', 'https://www.royalroad.com/fiction/syndication/47557', 'rss'),
+    ('REND', 'https://www.royalroad.com/fiction/syndication/32615', 'rss'),
+    ('Essence of Cultivation', 'https://www.royalroad.com/fiction/syndication/34710', 'rss'),
+    ('War Queen', 'https://www.royalroad.com/fiction/syndication/46850', 'rss'),
+    ('This Used To Be About Dungeons', 'https://www.royalroad.com/fiction/syndication/45534', 'rss')
+    # ('Blue Core', 'https://www.royalroad.com/fiction/syndication/25082', 'rss'),
 ]
 
 def pparse(tree, i=1):
