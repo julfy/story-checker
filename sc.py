@@ -42,6 +42,7 @@ Chapter = namedtuple('Chapter', ['title', 'link', 'pubdate'])
 
 log = logging.getLogger(__name__)
 
+
 def select_log_out(choice=None):
     log.setLevel(logging.DEBUG)
     if choice == 'file':
@@ -97,7 +98,11 @@ def get_royalroad_rss(link):
     xml = ET.fromstring(data)
     for child in xml[0]:
         if child.tag == 'item':
-            return Chapter(title=child[0].text, link=child[1].text, pubdate=datetime.strptime(child[4].text, '%a, %d %b %Y %H:%M:%S %Z').timestamp())
+            return Chapter(
+                title=child[0].text,
+                link=child[1].text,
+                pubdate=datetime.strptime(child[4].text, '%a, %d %b %Y %H:%M:%S %Z').timestamp(),
+            )
 
 
 def get_tgab(link):
@@ -115,7 +120,11 @@ def get_tgab(link):
             if ch.tag == 'header':
                 h1 = ch[0][0]  # .h1.a
                 date = ch[1][0][0][0]  # .entry-meta.date.a.time
-                return Chapter(title=h1.text, link=h1.attrib['href'], pubdate=datetime.strptime(date.attrib['datetime'], '%Y-%m-%dT%H:%M:%S%z').timestamp())
+                return Chapter(
+                    title=h1.text,
+                    link=h1.attrib['href'],
+                    pubdate=datetime.strptime(date.attrib['datetime'], '%Y-%m-%dT%H:%M:%S%z').timestamp(),
+                )
         return None
 
     return parse([xml])
@@ -124,7 +133,7 @@ def get_tgab(link):
 def get_pgte(link):
     data = get_data(link)
     acut = data.find('<article')
-    if data[acut:acut+100].startswith('<article id="post-3"'):  # skip pinned
+    if data[acut : acut+100].startswith('<article id="post-3"'):  # skip pinned
         acut = data.find('<article', acut+10)
     scut = data.find('<header', acut+10)
     ecut = data.find('</header>', scut) + 9
@@ -135,7 +144,11 @@ def get_pgte(link):
             if ch.tag == 'header':
                 h1 = ch[0][0]  # .h1.a
                 date = ch[1][0][0][-1]  # .entry-meta.posted-on.a.time
-                return Chapter(title=h1.text, link=h1.attrib['href'], pubdate=datetime.strptime(date.attrib['datetime'], '%Y-%m-%dT%H:%M:%S%z').timestamp())
+                return Chapter(
+                    title=h1.text,
+                    link=h1.attrib['href'],
+                    pubdate=datetime.strptime(date.attrib['datetime'], '%Y-%m-%dT%H:%M:%S%z').timestamp(),
+                )
         return None
 
     return parse([xml])
@@ -153,8 +166,6 @@ def assign_getters(r):
         raise Exception(f'No getter named {getter_name}')
     return (story, link, getter)
 
-# Replace getter names with actual getters
-STORIES = list(map(assign_getters, STORIES))
 
 class Checker:
     def __init__(self, send=False, update_history=True):
@@ -181,7 +192,10 @@ class Checker:
         subject = name
         content = f'<a href="{chapter.link}">{chapter.title}</a>'
         data = f'Subject:{subject}\nContent-Type: text/html; charset="utf-8"\n\n{content}\n'
-        subprocess.run(['msmtp', '-F', 'StoryChecker', address], stdin=subprocess.Popen(['printf', data], stdout=subprocess.PIPE).stdout)
+        subprocess.run(
+            ['msmtp', '-F', 'StoryChecker', address],
+            stdin=subprocess.Popen(['printf', data], stdout=subprocess.PIPE).stdout,
+        )
 
     def check_story(self, name, link, getter):
         try:
@@ -212,28 +226,47 @@ class Checker:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group()
-    group.add_argument('-d', type=str, metavar='email', help = 'Start periodic check loop and send notifications to email; run every 5th minute of an hour')
-    group.add_argument('-t', type=str, metavar='email', default=None, const='NONE', nargs='?', help = 'Test run; sends email')
+    group.add_argument(
+        '-d',
+        type=str,
+        metavar='email',
+        help='Start periodic check loop and send notifications to email;'
+        'run every 5th minute of an hour',
+    )
+    group.add_argument(
+        '-t',
+        type=str,
+        metavar='email',
+        default=None,
+        const='NONE',
+        nargs='?',
+        help='Test run; sends email',
+    )
 
     args = parser.parse_args()
+
+    # Replace getter names with actual getters
+    STORIES = list(map(assign_getters, STORIES))
+
     if args.d:
         select_log_out('file')
-        NOTIFY_EMAIL=args.d
+        NOTIFY_EMAIL = args.d
         checker = Checker(send=True)
         log.info('Starting loop')
         period = 600.0  # first time 10 minutes
         while True:
+            log.info(f'Sleeping for {int(period)}s')
             time.sleep(period)
             checker.check_stories(STORIES)
             # calc next period
             delta = int(datetime.now().minute - 5)
-            period = 60.0 * (((delta >> 31) + 1) * 60 - delta) # heh
+            period = 60.0 * (((delta >> 31) + 1) * 60 - delta)  # heh
     elif args.t:
         select_log_out('stdout')
-        NOTIFY_EMAIL=args.t
+        NOTIFY_EMAIL = args.t
         c = Checker(send=args.t != 'NONE', update_history=False)
         c.check_stories([('Test', 'http://google.com', lambda link: Chapter('Chapter 1', link, 1))])
     else:
         select_log_out('stdout')
-        c=Checker(send=False, update_history=True)
+        c = Checker(send=False, update_history=True)
         c.check_stories(STORIES)
