@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import argparse
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import html
 import json
 import os
@@ -223,6 +223,15 @@ class Checker:
         self.save_history()
 
 
+def get_next_period():
+    # delta = int(datetime.now().minute - 5)
+    # period = 60.0 * (((delta >> 31) + 1) * 60 - delta)  # heh
+    now = datetime.now()
+    next_point = (now + timedelta(hours=1)).replace(minute=5, second=0, microsecond=0)
+    period = (next_point - now).total_seconds()
+    return period
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group()
@@ -258,9 +267,7 @@ if __name__ == '__main__':
             log.info(f'Sleeping for {int(period)}s')
             time.sleep(period)
             checker.check_stories(STORIES)
-            # calc next period
-            delta = int(datetime.now().minute - 5)
-            period = 60.0 * (((delta >> 31) + 1) * 60 - delta)  # heh
+            period = get_next_period()
     elif args.t:
         select_log_out('stdout')
         NOTIFY_EMAIL = args.t
