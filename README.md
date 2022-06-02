@@ -1,6 +1,6 @@
 Will periodically check the list of web novels and send a notification email in case of update.
 
-Really, anything-checker, provided with link and a parser.
+Really, anything-checker, if provided with a link and a parser.
 
 Usage:
 
