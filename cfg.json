@@ -1,0 +1,8 @@
+{
+    "destination_email": "",
+    "gmail_account": "",
+    "cid": "",
+    "secret": "",
+    "refresh_token": "",
+    "expire_in": 3599,
+}

@@ -1,0 +1,39 @@
+#!/usr/bin/python3
+import json
+import os
+import subprocess as sp
+import time
+
+cwd = os.path.dirname(os.path.abspath(__file__))
+
+def get_config(fname):
+    with open(fname, 'r') as f:
+        return json.load(f)
+
+
+def update_config(fname, cfg):
+    with open(fname, 'w') as f:
+        f.write(json.dumps(cfg, indent=4))
+
+
+def refresh(account, cid, secret, refresh_token):
+    cmd = (
+        f'{cwd}/oauth2.py --user={account} --client_id={cid} '
+        f'--client_secret={secret} --refresh_token={refresh_token} --quiet'
+    )
+    access_token = sp.check_output(cmd.split(' ')).decode()[:-1]  # drop newline
+    return access_token
+
+
+cfg_file_name = cwd + '/cfg.json'
+cfg = get_config(cfg_file_name)
+now = int(time.time())
+
+if 'access_token' in cfg and cfg['expire_at'] < now:
+    print(cfg['access_token'])
+else:
+    token = refresh(cfg['gmail_account'], cfg['cid'], cfg['secret'], cfg['refresh_token'])
+    cfg['access_token'] = token
+    cfg['expire_at'] = now + min(60, cfg['expire_in'] - 300)  # 5 minutes grace period
+    update_config(cfg_file_name, cfg)
+    print(token)

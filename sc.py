@@ -11,29 +11,6 @@ import logging
 from collections import namedtuple
 import xml.etree.ElementTree as ET
 
-
-########################################
-# -d to run in infinite loop with output to log
-
-# For gmail (with deactivated 2-factor login) use this configuration in /etc/msmtprc:
-
-# # Set default values for all following accounts.
-# defaults
-# port 587
-# tls on
-# tls_trust_file /etc/ssl/certs/ca-certificates.crt
-# account gmail
-# host smtp.gmail.com
-# from <user>@gmail.com
-# auth on
-# user <user>
-# password <your password>
-# # Set a default account
-# account default : gmail
-#
-########################################
-
-
 LOGFILE = 'story_checker.log'
 HISTORY_FILE = 'story_checker_history.json'
 NOTIFY_EMAIL = None  # Receiver email
@@ -193,7 +170,7 @@ class Checker:
         content = f'<a href="{chapter.link}">{chapter.title}</a>'
         data = f'Subject:{subject}\nContent-Type: text/html; charset="utf-8"\n\n{content}\n'
         subprocess.run(
-            ['msmtp', '-F', 'StoryChecker', address],
+            ['msmtp', '-a', 'sc-gmail', '-F', 'StoryChecker', address],
             stdin=subprocess.Popen(['printf', data], stdout=subprocess.PIPE).stdout,
         )
 

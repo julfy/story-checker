@@ -6,4 +6,4 @@ git rebase
 git stash pop
 
 pkill -f 'sc.py'
-(./sc.py -d 'XXXXX@gmail.com' &)
+(./sc.py -d "$(grep destination_email cfg.json | sed 's/^.*://' | sed 's/[ ",]*//g')" &)
