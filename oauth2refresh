@@ -29,7 +29,7 @@ cfg_file_name = cwd + '/cfg.json'
 cfg = get_config(cfg_file_name)
 now = int(time.time())
 
-if 'access_token' in cfg and cfg['expire_at'] < now:
+if 'access_token' in cfg and cfg['expire_at'] > now:
     print(cfg['access_token'])
 else:
     token = refresh(cfg['gmail_account'], cfg['cid'], cfg['secret'], cfg['refresh_token'])
