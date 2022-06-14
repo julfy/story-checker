@@ -13,6 +13,7 @@ import xml.etree.ElementTree as ET
 
 LOGFILE = 'story_checker.log'
 HISTORY_FILE = 'story_checker_history.json'
+MSMTP_ACCOUNT = 'sc-gmail'
 NOTIFY_EMAIL = None  # Receiver email
 
 Chapter = namedtuple('Chapter', ['title', 'link', 'pubdate'])
@@ -145,8 +146,8 @@ def assign_getters(r):
 
 
 class Checker:
-    def __init__(self, send=False, update_history=True):
-        self.send_email = send
+    def __init__(self, dry_run=False, update_history=True):
+        self.dry_run = dry_run
         self.update_history = update_history
         self.history_file = os.path.expanduser(HISTORY_FILE)
         self.history = self.get_history()
@@ -163,35 +164,51 @@ class Checker:
         with open(self.history_file, 'w') as out:
             out.write(json.dumps(self.history))
 
-    def send_notification(self, address, name, chapter):
+    def send_email(self, address, subject, content) -> bool:
+        if self.dry_run:
+            log.warning(f'Dry run, not sending: {address} < {subject}: {content}')
+            return True
         if not address:
             raise Exception('Receiver address not set!')
+        data = f'Subject:{subject}\nContent-Type: text/html; charset="utf-8"\n\n{content}\n'
+        res = subprocess.run(
+            ['msmtp', '-a', MSMTP_ACCOUNT, '-F', 'StoryChecker', address],
+            stdin=subprocess.Popen(['printf', data], stdout=subprocess.PIPE).stdout,
+            capture_output=True,
+        )
+        if res.returncode != 0:
+            log.error(
+                f'Faled to send email to {address}:\n'
+                f'STDOUT:\n{res.stdout.decode()}\n'
+                f'STDERR:\n{res.stderr.decode()}'
+            )
+        return res.returncode == 0
+
+    def send_notification(self, address, name, chapter) -> bool:
         subject = name
         content = f'<a href="{chapter.link}">{chapter.title}</a>'
-        data = f'Subject:{subject}\nContent-Type: text/html; charset="utf-8"\n\n{content}\n'
-        subprocess.run(
-            ['msmtp', '-a', 'sc-gmail', '-F', 'StoryChecker', address],
-            stdin=subprocess.Popen(['printf', data], stdout=subprocess.PIPE).stdout,
-        )
+        return self.send_email(address, subject, content)
 
     def check_story(self, name, link, getter):
         try:
             chapter = getter(link)
         except Exception:
+            chapter = None
             log.exception(f'Failed to get {name}')
-            return
+
         if chapter is None:
-            log.error(f'Failed to get {name}')
+            self.send_email(NOTIFY_EMAIL, 'Alert', f'Failed to check {name}')
             return
+
         last_ts = self.history.get(name, 0)
         is_new = last_ts < chapter.pubdate
-        if is_new:
-            self.history.update({name: chapter.pubdate})
         new_pfx = '--> ' if is_new else ''
-        pretty_date = datetime.fromtimestamp(self.history[name]).replace(tzinfo=timezone.utc).astimezone(tz=None)
+        pretty_date = datetime.fromtimestamp(chapter.pubdate).replace(tzinfo=timezone.utc).astimezone(tz=None)
         log.info(f'{new_pfx}\t{pretty_date} - {name}')
-        if is_new and self.send_email:
-            self.send_notification(NOTIFY_EMAIL, name, chapter)
+        if is_new:
+            sent = self.send_notification(NOTIFY_EMAIL, name, chapter)
+            if sent:
+                self.history.update({name: chapter.pubdate})
 
     def check_stories(self, stories):
         for story, link, getter in stories:
@@ -228,6 +245,12 @@ if __name__ == '__main__':
         nargs='?',
         help='Test run; sends email',
     )
+    group.add_argument(
+        '-f',
+        default=False,
+        action='store_true',
+        help='Only update history file',
+    )
 
     args = parser.parse_args()
 
@@ -237,7 +260,7 @@ if __name__ == '__main__':
     if args.d:
         select_log_out('file')
         NOTIFY_EMAIL = args.d
-        checker = Checker(send=True)
+        checker = Checker()
         log.info('Starting loop')
         period = 600.0  # first time 10 minutes
         while True:
@@ -248,9 +271,12 @@ if __name__ == '__main__':
     elif args.t:
         select_log_out('stdout')
         NOTIFY_EMAIL = args.t
-        c = Checker(send=args.t != 'NONE', update_history=False)
+        c = Checker(dry_run=args.t == 'NONE', update_history=False)
         c.check_stories([('Test', 'http://google.com', lambda link: Chapter('Chapter 1', link, 1))])
-    else:
+    elif args.f:
         select_log_out('stdout')
-        c = Checker(send=False, update_history=True)
+        c = Checker(dry_run=True, update_history=True)
         c.check_stories(STORIES)
+    else:
+        parser.print_help(sys.stderr)
+        sys.exit(1)
