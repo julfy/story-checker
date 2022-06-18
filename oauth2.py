@@ -128,7 +128,7 @@ GOOGLE_ACCOUNTS_BASE_URL = 'https://accounts.google.com'
 
 
 # Hardcoded dummy redirect URI for non-web apps.
-REDIRECT_URI = 'urn:ietf:wg:oauth:2.0:oob'
+REDIRECT_URI = 'http://localhost:1'
 
 
 def AccountsUrl(command):
