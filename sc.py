@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import argparse
-from datetime import datetime, timezone, timedelta
+import datetime as dt
 import html
 import json
 import os
@@ -33,7 +33,7 @@ def select_log_out(choice=None):
 
 STORIES = [
     # ('PGTE', 'https://practicalguidetoevil.wordpress.com/', 'pgte'),
-    # ('Pale Lights', 'https://palelights613694448.wordpress.com/', '')
+    ('Pale Lights', 'https://palelights.com/table-of-contents', 'pl'),
     ('TGAB', 'https://tiraas.net/', 'tgab'),
     ('Metaworld Chronicles', 'https://www.royalroad.com/fiction/syndication/14167', 'rss'),
     ('Seaborn', 'https://www.royalroad.com/fiction/syndication/30131', 'rss'),
@@ -47,12 +47,12 @@ STORIES = [
     ('Delve', 'https://www.royalroad.com/fiction/syndication/25225', 'rss'),
     ('Only Villains Do That', 'https://www.royalroad.com/fiction/syndication/40182', 'rss'),
     # ('The Perfect Run', 'https://www.royalroad.com/fiction/syndication/36735', 'rss'),
-    ('Kairos: A Greek Myth', 'https://www.royalroad.com/fiction/syndication/41033', 'rss'),
+    # ('Kairos: A Greek Myth', 'https://www.royalroad.com/fiction/syndication/41033', 'rss'),
     ('I Am Going To Die', 'https://www.royalroad.com/fiction/syndication/21844', 'rss'),
     ('Tower of Somnus', 'https://www.royalroad.com/fiction/syndication/36983', 'rss'),
     ('Vigor Mortis', 'https://www.royalroad.com/fiction/syndication/40373', 'rss'),
     ('Sylver Seeker', 'https://www.royalroad.com/fiction/syndication/36065', 'rss'),
-    ('Underland', 'https://www.royalroad.com/fiction/syndication/47557', 'rss'),
+    # ('Underland', 'https://www.royalroad.com/fiction/syndication/47557', 'rss'),
     ('REND', 'https://www.royalroad.com/fiction/syndication/32615', 'rss'),
     ('Essence of Cultivation', 'https://www.royalroad.com/fiction/syndication/34710', 'rss'),
     ('War Queen', 'https://www.royalroad.com/fiction/syndication/46850', 'rss'),
@@ -66,11 +66,19 @@ def pparse(tree, i=1):
         pparse(ch, i+2)
 
 ### GETTERS
+GETTERS = {}
 
 def get_data(link):
-    return html.unescape(subprocess.check_output(f'curl -s {link}'.split(' ')).decode())
+    return html.unescape(subprocess.check_output(f'curl -s -k -L {link}'.split(' ')).decode())
 
-def get_royalroad_rss(link):
+
+def reg_getter(f):
+    global GETTERS
+    GETTERS.update({f.__name__: f})
+
+
+@reg_getter
+def rss(link):
     # html.unescape will break this
     data = subprocess.check_output(f'curl -s {link}'.split(' ')).decode()
     xml = ET.fromstring(data)
@@ -79,11 +87,12 @@ def get_royalroad_rss(link):
             return Chapter(
                 title=child[0].text,
                 link=child[1].text,
-                pubdate=datetime.strptime(child[4].text, '%a, %d %b %Y %H:%M:%S %Z').timestamp(),
+                pubdate=dt.datetime.strptime(child[4].text, '%a, %d %b %Y %H:%M:%S %Z').timestamp(),
             )
 
 
-def get_tgab(link):
+@reg_getter
+def tgab(link):
     data = get_data(link)
     acut = data.find('<article')
     while "post-password-required" in data[acut:acut+300]:
@@ -101,14 +110,15 @@ def get_tgab(link):
                 return Chapter(
                     title=h1.text,
                     link=h1.attrib['href'],
-                    pubdate=datetime.strptime(date.attrib['datetime'], '%Y-%m-%dT%H:%M:%S%z').timestamp(),
+                    pubdate=dt.datetime.strptime(date.attrib['datetime'], '%Y-%m-%dT%H:%M:%S%z').timestamp(),
                 )
         return None
 
     return parse([xml])
 
 
-def get_pgte(link):
+@reg_getter
+def pgte(link):
     data = get_data(link)
     acut = data.find('<article')
     if data[acut : acut+100].startswith('<article id="post-3"'):  # skip pinned
@@ -125,23 +135,44 @@ def get_pgte(link):
                 return Chapter(
                     title=h1.text,
                     link=h1.attrib['href'],
-                    pubdate=datetime.strptime(date.attrib['datetime'], '%Y-%m-%dT%H:%M:%S%z').timestamp(),
+                    pubdate=dt.datetime.strptime(date.attrib['datetime'], '%Y-%m-%dT%H:%M:%S%z').timestamp(),
                 )
         return None
 
     return parse([xml])
 
 
+@reg_getter
+def pl(link):
+    data = get_data(link)
+    scut = data.find('<main')
+    ecut = data.find('</main>', scut) + 7
+    xml = ET.fromstring(data[scut:ecut])
+    name, link = None, None
+
+    def parse_toc(tree):
+        nonlocal name, link
+        for ch in tree:
+            if ch.tag == 'li':
+                a = ch[0]  # .a
+                name, link = (a.text, a.attrib['href'])
+            else:
+                parse_toc(ch)
+
+    parse_toc(xml)
+
+    data = get_data(link)
+    scut = data.find('<time class="entry-date published updated"')
+    ecut = data.find('</time>', scut) + 7
+    xml = ET.fromstring(data[scut:ecut])
+    date = dt.datetime.strptime(xml.attrib['datetime'], '%Y-%m-%dT%H:%M:%S%z').timestamp()
+
+    return Chapter(title=name, link=link, pubdate=date)
+
+
 def assign_getters(r):
     story, link, getter_name = r
-    if getter_name == 'rss':
-        getter = get_royalroad_rss
-    elif getter_name == 'tgab':
-        getter = get_tgab
-    elif getter_name == 'pgte':
-        getter = get_pgte
-    else:
-        raise Exception(f'No getter named {getter_name}')
+    getter = GETTERS[getter_name]
     return (story, link, getter)
 
 
@@ -203,7 +234,7 @@ class Checker:
         last_ts = self.history.get(name, 0)
         is_new = last_ts < chapter.pubdate
         new_pfx = '--> ' if is_new else ''
-        pretty_date = datetime.fromtimestamp(chapter.pubdate).replace(tzinfo=timezone.utc).astimezone(tz=None)
+        pretty_date = dt.datetime.fromtimestamp(chapter.pubdate).replace(tzinfo=dt.timezone.utc).astimezone(tz=None)
         log.info(f'{new_pfx}\t{pretty_date} - {name}')
         if is_new:
             sent = self.send_notification(NOTIFY_EMAIL, name, chapter)
@@ -220,8 +251,8 @@ class Checker:
 def get_next_period():
     # delta = int(datetime.now().minute - 5)
     # period = 60.0 * (((delta >> 31) + 1) * 60 - delta)  # heh
-    now = datetime.now()
-    next_point = (now + timedelta(hours=1)).replace(minute=5, second=0, microsecond=0)
+    now = dt.datetime.now()
+    next_point = (now + dt.timedelta(hours=1)).replace(minute=5, second=0, microsecond=0)
     period = (next_point - now).total_seconds()
     return period
 
