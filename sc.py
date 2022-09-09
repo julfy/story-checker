@@ -144,10 +144,10 @@ def pgte(link):
 
 @reg_getter
 def pl(link):
-    data = get_data(link)
-    scut = data.find('<main')
-    ecut = data.find('</main>', scut) + 7
-    xml = ET.fromstring(data[scut:ecut])
+    toc_data = get_data(link)
+    scut = toc_data.find('<main')
+    ecut = toc_data.find('</main>', scut) + 7
+    xml = ET.fromstring(toc_data[scut:ecut])
     name, link = None, None
 
     def parse_toc(tree):
@@ -161,10 +161,10 @@ def pl(link):
 
     parse_toc(xml)
 
-    data = get_data(link)
-    scut = data.find('<time class="entry-date published updated"')
-    ecut = data.find('</time>', scut) + 7
-    xml = ET.fromstring(data[scut:ecut])
+    ch_data = get_data(link)
+    scut = ch_data.find('<time class="entry-date')
+    ecut = ch_data.find('</time>', scut) + 7
+    xml = ET.fromstring(ch_data[scut:ecut])
     date = dt.datetime.strptime(xml.attrib['datetime'], '%Y-%m-%dT%H:%M:%S%z').timestamp()
 
     return Chapter(title=name, link=link, pubdate=date)
