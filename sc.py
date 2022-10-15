@@ -58,6 +58,7 @@ STORIES = [
     ('War Queen', 'https://www.royalroad.com/fiction/syndication/46850', 'rss'),
     ('This Used To Be About Dungeons', 'https://www.royalroad.com/fiction/syndication/45534', 'rss')
     # ('Blue Core', 'https://www.royalroad.com/fiction/syndication/25082', 'rss'),
+    ('Godslayers', 'https://www.royalroad.com/fiction/syndication/52503', 'rss'),
 ]
 
 def pparse(tree, i=1):
