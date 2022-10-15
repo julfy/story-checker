@@ -56,18 +56,21 @@ STORIES = [
     ('REND', 'https://www.royalroad.com/fiction/syndication/32615', 'rss'),
     ('Essence of Cultivation', 'https://www.royalroad.com/fiction/syndication/34710', 'rss'),
     ('War Queen', 'https://www.royalroad.com/fiction/syndication/46850', 'rss'),
-    ('This Used To Be About Dungeons', 'https://www.royalroad.com/fiction/syndication/45534', 'rss')
+    ('This Used To Be About Dungeons', 'https://www.royalroad.com/fiction/syndication/45534', 'rss'),
     # ('Blue Core', 'https://www.royalroad.com/fiction/syndication/25082', 'rss'),
     ('Godslayers', 'https://www.royalroad.com/fiction/syndication/52503', 'rss'),
 ]
+
 
 def pparse(tree, i=1):
     print(f'{" "*i}{tree.tag} {tree.attrib}')
     for ch in tree:
         pparse(ch, i+2)
 
+
 ### GETTERS
 GETTERS = {}
+
 
 def get_data(link):
     return html.unescape(subprocess.check_output(f'curl -s -k -L {link}'.split(' ')).decode())
