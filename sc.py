@@ -38,7 +38,7 @@ STORIES = [
     ('Metaworld Chronicles', 'https://www.royalroad.com/fiction/syndication/14167', 'rss'),
     ('Seaborn', 'https://www.royalroad.com/fiction/syndication/30131', 'rss'),
     ('Dungeon Crawler Carl', 'https://www.royalroad.com/fiction/syndication/29358', 'rss'),
-    ('Savage Divinity', 'https://www.royalroad.com/fiction/syndication/5701', 'rss'),
+    # ('Savage Divinity', 'https://www.royalroad.com/fiction/syndication/5701', 'rss'),
     ('Displaced', 'https://www.royalroad.com/fiction/syndication/15538', 'rss'),
     ('Super Minion', 'https://www.royalroad.com/fiction/syndication/21410', 'rss'),
     ('A Journey of Black and Red', 'https://www.royalroad.com/fiction/syndication/26675', 'rss'),
@@ -59,6 +59,13 @@ STORIES = [
     ('This Used To Be About Dungeons', 'https://www.royalroad.com/fiction/syndication/45534', 'rss'),
     # ('Blue Core', 'https://www.royalroad.com/fiction/syndication/25082', 'rss'),
     ('Godslayers', 'https://www.royalroad.com/fiction/syndication/52503', 'rss'),
+    ('Zenith of Sorcery', 'https://www.royalroad.com/fiction/syndication/71045', 'rss'),
+    ('Super Supportive', 'https://www.royalroad.com/fiction/syndication/63759', 'rss'),
+    ('Tresholder', 'https://www.royalroad.com/fiction/syndication/60396', 'rss'),
+    ('Bioshifter', 'https://www.royalroad.com/fiction/syndication/59450', 'rss'),
+    ('Commerce Emperor', 'https://www.royalroad.com/fiction/syndication/69923', 'rss'),
+    ('12 Miles Below', 'https://www.royalroad.com/fiction/syndication/42367', 'rss'),
+    ('Beware of Chicken', 'https://www.royalroad.com/fiction/syndication/39408', 'rss'),
 ]
 
 
