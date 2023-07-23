@@ -263,7 +263,7 @@ def get_next_period():
     # delta = int(datetime.now().minute - 5)
     # period = 60.0 * (((delta >> 31) + 1) * 60 - delta)  # heh
     now = dt.datetime.now()
-    next_point = (now + dt.timedelta(hours=1)).replace(minute=5, second=0, microsecond=0)
+    next_point = (now + dt.timedelta(hours=1)).replace(minute=10, second=0, microsecond=0)
     period = (next_point - now).total_seconds()
     return period
 
